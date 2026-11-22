@@ -1,3 +1,4 @@
+<pre>
 <p align="center">
   <picture>
     <source
@@ -11,7 +12,7 @@
     />
   </picture>
 </p>
-<pre>
+
 qnetlink                                               November 22, 2026
 Category: Product and Build Information
 
