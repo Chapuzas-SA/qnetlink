@@ -1,3 +1,16 @@
+<p align="center">
+  <picture>
+    <source
+      media="(prefers-color-scheme: dark)"
+      srcset=".github/assets/qnetlink-banner-dark.png"
+    />
+    <img
+      src=".github/assets/qnetlink-banner-light.png"
+      alt="qnetlink architecture — QEMU, direct TCP and WSS/TLS relay, libslirp"
+      width="100%"
+    />
+  </picture>
+</p>
 <pre>
 qnetlink                                               November 22, 2026
 Category: Product and Build Information
