@@ -63,22 +63,23 @@ qnetlink                         Product and Build Information    November 2026
    In the direct TCP arrangement, the client runs libslirp and
    connects to a separately configured QEMU stream endpoint:
 
-             QEMU TCP peer             qnetlink client
-           +----------------+  TCP   +--------------------+
-           |                |<------>| stream transport   |
-           |  QEMU guest    |        |         |          |
-           |                |        |      libslirp      |
-           +----------------+        +--------------------+
+</pre>
+
+![Direct TCP connection between QEMU and the qnetlink client running libslirp](.github/assets/tcp-connection-light.svg#gh-light-mode-only)
+![Direct TCP connection between QEMU and the qnetlink client running libslirp](.github/assets/tcp-connection-dark.svg#gh-dark-mode-only)
+
+<pre>
 
    In the WSS arrangement, the client reaches a server-side relay
    through a TLS-protected WebSocket connection. The server connects
    onward to the QEMU TCP stream peer:
 
-        qnetlink client       qnetlink server       QEMU TCP peer
-       +-------------------+     +-------------------+     +------------+
-       | libslirp          | WSS | WSS listener      | TCP |            |
-       | stream transport  |<--->| TCP relay         |<--->|    QEMU    |
-       +-------------------+ TLS +-------------------+     +------------+
+</pre>
+
+![WSS TLS connection between qnetlink client, qnetlink server relay and QEMU](.github/assets/wss-relay-light.svg#gh-light-mode-only)
+![WSS TLS connection between qnetlink client, qnetlink server relay and QEMU](.github/assets/wss-relay-dark.svg#gh-dark-mode-only)
+
+<pre>
 
    The diagrams show logical stream connections. They do not imply
    that QEMU is started by qnetlink or that the components must
@@ -107,12 +108,12 @@ qnetlink                         Product and Build Information    November 2026
    a four-octet, unsigned, network-byte-order packet length, followed
    by that number of payload octets:
 
-           0                   1                   2                   3
-           +-------------------+-------------------+-------------------+
-           |          Packet length (32-bit, big-endian)                |
-           +-----------------------------------------------------------+
-           |                     Packet payload ...                    |
-           +-----------------------------------------------------------+
+</pre>
+
+![Stream frame with a 32-bit big-endian packet length and packet payload](.github/assets/stream-framing-light.svg#gh-light-mode-only)
+![Stream frame with a 32-bit big-endian packet length and packet payload](.github/assets/stream-framing-dark.svg#gh-dark-mode-only)
+
+<pre>
 
    Zero-length packets and packets exceeding the implementation's
    maximum packet size are rejected by the stream receiver.
