@@ -11,7 +11,6 @@
     width="100%"
   />
 </p>
----
 
 ### `> ai_usage.log` — 🤖 Made with AI. Unfortunately, Also Humans™
 
