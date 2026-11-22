@@ -1,0 +1,19 @@
+diff --git a/lib/roles/http/server/server.c b/lib/roles/http/server/server.c
+--- a/lib/roles/http/server/server.c
++++ b/lib/roles/http/server/server.c
+@@ -258,6 +258,7 @@
+ #if defined(WIN32) && defined(LWS_WITH_UNIX_SOCK)
+ 		if (a->af != AF_UNIX) {
+ #endif
++		if (!a->info || !a->info->vh_listen_sockfd) {
+ #if (defined(WIN32) || defined(_WIN32)) && defined(SO_EXCLUSIVEADDRUSE)
+ 		/*
+ 		 * only accept that we are the only listener on the port
+@@ -290,6 +291,7 @@
+ #if defined(WIN32) && defined(LWS_WITH_UNIX_SOCK)
+ 		}
+ #endif
++		}
+ 
+ #if defined(LWS_WITH_IPV6) && defined(IPV6_V6ONLY)
+ 		/*

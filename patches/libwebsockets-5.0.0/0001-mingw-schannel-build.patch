@@ -1,0 +1,24 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1245,7 +1245,7 @@ endif(MSVC)
+ if (MINGW)
+ 	set(LWS_MINGW_SUPPORT 1)
+ 	set(CMAKE_C_FLAGS "-D__USE_MINGW_ANSI_STDIO ${CMAKE_C_FLAGS}")
+-	add_definitions(-DWINVER=0x0601 -D_WIN32_WINNT=0x0601)
++	add_definitions(-DWINVER=0x0603 -D_WIN32_WINNT=0x0603 -DNTDDI_VERSION=0x06030000)
+ endif()
+ 
+ if (HDR_PRIVATE)
+diff --git a/lib/plat/windows/windows-spawn.c b/lib/plat/windows/windows-spawn.c
+--- a/lib/plat/windows/windows-spawn.c
++++ b/lib/plat/windows/windows-spawn.c
+@@ -27,7 +27,7 @@
+ #include <tchar.h>
+ #include <stdio.h>
+ #include <strsafe.h>
+-#include <Psapi.h>
++#include <psapi.h>
+ 
+ #ifndef EXTENDED_STARTUPINFO_PRESENT
+ #define EXTENDED_STARTUPINFO_PRESENT 0x00080000
