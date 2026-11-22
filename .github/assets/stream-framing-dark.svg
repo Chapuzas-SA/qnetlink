@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="425" viewBox="0 0 960 425" role="img" aria-labelledby="title desc">
+<title id="title">qnetlink stream-framing.log — dark theme</title>
+<desc id="desc">A 4-byte unsigned big-endian packet length followed by the packet payload</desc>
+<rect x="2" y="2" width="956" height="421" rx="20" fill="#282738" stroke="#56516C" stroke-width="2"/>
+<path d="M2 58 L958 58" fill="none" stroke="#514C66" stroke-width="2" stroke-linecap="round"/>
+<circle cx="30" cy="30" r="7" fill="#F2B7C8"/>
+<circle cx="54" cy="30" r="7" fill="#F0DDAE"/>
+<circle cx="78" cy="30" r="7" fill="#B8DDC5"/>
+<text x="480" y="36" fill="#AAA8C2" font-size="16" font-weight="400" text-anchor="middle" font-family="Consolas, DejaVu Sans Mono, monospace">stream-framing.log — ~/qnetlink</text>
+<text x="38" y="98" fill="#B8DDC5" font-size="17" font-weight="600" text-anchor="start" font-family="Consolas, DejaVu Sans Mono, monospace">$ ./qnetlink --inspect stream</text>
+<text x="38" y="131" fill="#AAA8C2" font-size="14" font-weight="400" text-anchor="start" font-family="Consolas, DejaVu Sans Mono, monospace">[ LENGTH-PREFIXED BINARY STREAM ]</text>
+<text x="72" y="172" fill="#AAA8C2" font-size="15" font-weight="400" text-anchor="start" font-family="Consolas, DejaVu Sans Mono, monospace">octet offsets</text>
+<text x="215" y="197" fill="#ECE8F7" font-size="17" font-weight="700" text-anchor="middle" font-family="Consolas, DejaVu Sans Mono, monospace">0</text>
+<path d="M215 205 L215 221" fill="none" stroke="#77728F" stroke-width="2" stroke-linecap="round"/>
+<text x="392" y="197" fill="#ECE8F7" font-size="17" font-weight="700" text-anchor="middle" font-family="Consolas, DejaVu Sans Mono, monospace">1</text>
+<path d="M392 205 L392 221" fill="none" stroke="#77728F" stroke-width="2" stroke-linecap="round"/>
+<text x="569" y="197" fill="#ECE8F7" font-size="17" font-weight="700" text-anchor="middle" font-family="Consolas, DejaVu Sans Mono, monospace">2</text>
+<path d="M569 205 L569 221" fill="none" stroke="#77728F" stroke-width="2" stroke-linecap="round"/>
+<text x="746" y="197" fill="#ECE8F7" font-size="17" font-weight="700" text-anchor="middle" font-family="Consolas, DejaVu Sans Mono, monospace">3</text>
+<path d="M746 205 L746 221" fill="none" stroke="#77728F" stroke-width="2" stroke-linecap="round"/>
+<rect x="70" y="221" width="820" height="66" rx="10" fill="#B6A3E0"/>
+<text x="480" y="262" fill="#303149" font-size="19" font-weight="700" text-anchor="middle" font-family="Consolas, DejaVu Sans Mono, monospace">Packet length (32-bit, big-endian)</text>
+<rect x="70" y="296" width="820" height="62" rx="10" fill="#B8DDC5"/>
+<text x="480" y="335" fill="#303149" font-size="19" font-weight="700" text-anchor="middle" font-family="Consolas, DejaVu Sans Mono, monospace">Packet payload ...</text>
+<text x="38" y="390" fill="#B8DDC5" font-size="15" font-weight="400" text-anchor="start" font-family="Consolas, DejaVu Sans Mono, monospace">[OK] 4-byte length prefix followed by payload octets.</text>
+</svg>

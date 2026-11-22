@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="445" viewBox="0 0 960 445" role="img" aria-labelledby="title desc">
+<title id="title">qnetlink tcp-connection.log — light theme</title>
+<desc id="desc">QEMU TCP peer communicates with qnetlink client running libslirp</desc>
+<rect x="2" y="2" width="956" height="441" rx="20" fill="#F8F5FC" stroke="#D6CDE5" stroke-width="2"/>
+<path d="M2 58 L958 58" fill="none" stroke="#DDD5E9" stroke-width="2" stroke-linecap="round"/>
+<circle cx="30" cy="30" r="7" fill="#F4C2D0"/>
+<circle cx="54" cy="30" r="7" fill="#F5E2B6"/>
+<circle cx="78" cy="30" r="7" fill="#B6DFC9"/>
+<text x="480" y="36" fill="#6C6683" font-size="16" font-weight="400" text-anchor="middle" font-family="Consolas, DejaVu Sans Mono, monospace">tcp-connection.log — ~/qnetlink</text>
+<text x="38" y="98" fill="#B6DFC9" font-size="17" font-weight="600" text-anchor="start" font-family="Consolas, DejaVu Sans Mono, monospace">$ ./qnetlink --inspect tcp</text>
+<text x="38" y="131" fill="#6C6683" font-size="14" font-weight="400" text-anchor="start" font-family="Consolas, DejaVu Sans Mono, monospace">[ LOCAL STREAM / DIRECT TCP ]</text>
+<rect x="46" y="164" width="300" height="151" rx="15" fill="#B8E0EF"/>
+<text x="196" y="208" fill="#33324D" font-size="23" font-weight="700" text-anchor="middle" font-family="Consolas, DejaVu Sans Mono, monospace">QEMU TCP PEER</text>
+<text x="196" y="245" fill="#33324D" font-size="17" font-weight="400" text-anchor="middle" font-family="Consolas, DejaVu Sans Mono, monospace">QEMU guest</text>
+<text x="196" y="275" fill="#33324D" font-size="13" font-weight="400" text-anchor="middle" font-family="Consolas, DejaVu Sans Mono, monospace">independent process</text>
+<rect x="612" y="164" width="300" height="151" rx="15" fill="#D0C0F2"/>
+<text x="762" y="207" fill="#33324D" font-size="21" font-weight="700" text-anchor="middle" font-family="Consolas, DejaVu Sans Mono, monospace">QNETLINK CLIENT</text>
+<rect x="656" y="224" width="212" height="58" rx="12" fill="#B6DFC9"/>
+<text x="762" y="260" fill="#33324D" font-size="20" font-weight="700" text-anchor="middle" font-family="Consolas, DejaVu Sans Mono, monospace">libslirp</text>
+<path d="M360 239 L598 239" fill="none" stroke="#9D92B1" stroke-width="3" stroke-linecap="round"/>
+<path d="M370 231 L360 239" fill="none" stroke="#9D92B1" stroke-width="3" stroke-linecap="round"/>
+<path d="M370 247 L360 239" fill="none" stroke="#9D92B1" stroke-width="3" stroke-linecap="round"/>
+<path d="M588 231 L598 239" fill="none" stroke="#9D92B1" stroke-width="3" stroke-linecap="round"/>
+<path d="M588 247 L598 239" fill="none" stroke="#9D92B1" stroke-width="3" stroke-linecap="round"/>
+<rect x="426.0" y="189" width="106" height="32" rx="13" fill="#F5E2B6"/>
+<text x="479.0" y="210" fill="#33324D" font-size="15" font-weight="700" text-anchor="middle" font-family="Consolas, DejaVu Sans Mono, monospace">TCP STREAM</text>
+<text x="38" y="355" fill="#B6DFC9" font-size="16" font-weight="400" text-anchor="start" font-family="Consolas, DejaVu Sans Mono, monospace">[OK] User-mode networking runs outside QEMU.</text>
+<text x="38" y="382" fill="#6C6683" font-size="14" font-weight="400" text-anchor="start" font-family="Consolas, DejaVu Sans Mono, monospace">[INFO] QEMU stream endpoint is configured separately.</text>
+</svg>
