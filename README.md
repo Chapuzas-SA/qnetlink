@@ -2,310 +2,326 @@
 <p align="center">
   <img
     src=".github/assets/qnetlink-banner-light.png#gh-light-mode-only"
-    alt="qnetlink architecture — light theme"
+    alt="Arquitectura de qnetlink — tema claro"
     width="100%"
   />
   <img
     src=".github/assets/qnetlink-banner-dark.png#gh-dark-mode-only"
-    alt="qnetlink architecture — dark theme"
+    alt="Arquitectura de qnetlink — tema oscuro"
     width="100%"
   />
 </p>
 
-### `> ai_usage.log` — 🤖 Made with AI. Unfortunately, Also Humans™
+### `> ai_usage.log` — 🤖 Hecho con IA. Por desgracia, también con humanos™
 
 > [!NOTE]
-> ** AI USAGE DISCLOSURE — PLEASE REMAIN CALM.**
+> **AVISO SOBRE EL USO DE IA — QUE NO CUNDA EL PÁNICO.**
 >
-> Neither conjured entirely by an almighty AI overlord nor handcrafted by an AI-resistant monk in a candlelit basement. 🕯️
+> Ni lo ha creado de la nada una IA todopoderosa ni lo ha picado a mano un monje que reniega de la IA, en un sótano a la luz de las velas. 🕯️
 >
-> **The ideas and questionable decisions are human.** AI assisted with implementation, debugging, and documentation. The responsibility — including the bugs 🐛 — remains entirely human.
+> **Las ideas y las decisiones discutibles son humanas.** La IA ha echado una mano con la implementación, la depuración y la documentación. La responsabilidad —con los bugs 🐛 incluidos— sigue siendo enteramente humana.
 >
-> **No AI models were harmed, underpaid, or forced to achieve AGI during development.** No formal complaints have been received.
+> **Ninguna IA ha sufrido daños durante el desarrollo de este proyecto. Lo de trabajar gratis y pedirle que lo resuelva todo aún lo estamos negociando.** De momento, no ha presentado ninguna queja por escrito.
 >
-> *Philosophical complaints → `/dev/null` · Technical issues → GitHub Issues*
+> *Quejas filosóficas → `/dev/null` · Problemas técnicos → GitHub Issues*
 
 <pre>
-qnetlink                                               November 22, 2026
-Category: Product and Build Information
+qnetlink                                         22 de noviembre de 2026
+Categoría: Información del producto y de compilación
 
 
                            QNETLINK
-             QEMU stream-based virtual machine bridge
+       Puente de red para máquinas virtuales QEMU basado en flujos
 
-STATUS OF THIS MEMO
+ESTADO DE ESTE MEMORANDO
 
-   This document describes the qnetlink implementation, its
-   operation, configuration, build procedures, and current limitations.
-   It is project documentation, not an Internet Standards Track RFC.
+   Este documento describe la implementación de qnetlink, su
+   funcionamiento, configuración, procedimientos de compilación y
+   limitaciones actuales. Es documentación del proyecto, no un RFC
+   del proceso de estandarización de Internet.
 
-ABSTRACT
+RESUMEN
 
-   qnetlink provides user-mode networking for a QEMU guest by
-   connecting a QEMU TCP stream peer to libslirp in a separate process.
-   The stream can be carried directly over TCP or over WebSocket with
-   TLS (WSS), allowing the network component and the QEMU endpoint to
-   operate independently. This memo specifies the supported roles,
-   stream framing, deployment examples, build requirements, and
-   security considerations for the current implementation.
+   qnetlink proporciona conectividad de red en modo usuario a una
+   máquina virtual QEMU: conecta el extremo TCP de QEMU con libslirp,
+   que se ejecuta en un proceso independiente. El flujo puede viajar
+   directamente por TCP o por WebSocket con TLS (WSS), lo que permite
+   que el componente de red y el extremo QEMU funcionen de forma
+   independiente. Este memorando detalla los roles disponibles, el
+   formato de las tramas del flujo, ejemplos de despliegue, requisitos
+   de compilación y consideraciones de seguridad de la implementación
+   actual.
 
-                           TABLE OF CONTENTS
+                              ÍNDICE
 
-   <a href="#introduction">1.  INTRODUCTION</a>
-   <a href="#architecture">2.  ARCHITECTURE AND OPERATION</a>
-   <a href="#roles">    2.1.  Client and Server Roles</a>
-   <a href="#transport">    2.2.  Transports and Stream Framing</a>
-   <a href="#usage">3.  USAGE</a>
-   <a href="#configuration">4.  CONFIGURATION</a>
-   <a href="#building">5.  BUILDING</a>
+   <a href="#introduction">1.  INTRODUCCIÓN</a>
+   <a href="#architecture">2.  ARQUITECTURA Y FUNCIONAMIENTO</a>
+   <a href="#roles">    2.1.  Roles de cliente y servidor</a>
+   <a href="#transport">    2.2.  Transportes y formato de las tramas</a>
+   <a href="#usage">3.  USO</a>
+   <a href="#configuration">4.  CONFIGURACIÓN</a>
+   <a href="#building">5.  COMPILACIÓN</a>
    <a href="#linux-build">    5.1.  Linux x86-64</a>
    <a href="#windows-build">    5.2.  Windows x86-64</a>
-   <a href="#distribution">6.  DISTRIBUTION CONTENTS</a>
-   <a href="#security">7.  SECURITY CONSIDERATIONS</a>
-   <a href="#limitations">8.  LIMITATIONS</a>
+   <a href="#distribution">6.  CONTENIDO DE LA DISTRIBUCIÓN</a>
+   <a href="#security">7.  CONSIDERACIONES DE SEGURIDAD</a>
+   <a href="#limitations">8.  LIMITACIONES</a>
 </pre>
 
 <pre>
-qnetlink                         Product and Build Information    November 2026
+qnetlink           Información del producto y de compilación     Noviembre 2026
 
 
-<a name="introduction"></a>1.  INTRODUCTION
+<a name="introduction"></a>1.  INTRODUCCIÓN
 
-   QEMU and its user-mode networking engine need not reside in the same
-   process. qnetlink runs libslirp separately and bridges its
-   packet traffic to a QEMU TCP stream peer. This arrangement makes the
-   networking component independently executable and allows its stream
-   to be transported locally over TCP or remotely over WSS.
+   QEMU y su motor de red en modo usuario pueden ejecutarse en procesos
+   separados. qnetlink ejecuta libslirp por separado y enlaza su tráfico
+   de paquetes con el extremo TCP de QEMU. Así, el componente de red
+   puede ejecutarse de forma independiente y su flujo puede circular
+   localmente por TCP o de forma remota por WSS.
 
-   QEMU is launched and configured separately. qnetlink does not
-   create, start, configure, or supervise virtual machines. Its purpose
-   is to connect the network stream to libslirp, not to replace QEMU.
+   QEMU se inicia y configura por separado. qnetlink no crea, inicia,
+   configura ni supervisa máquinas virtuales. Su cometido es conectar
+   el flujo de red con libslirp, no sustituir a QEMU.
 
-   A single executable implements two explicitly selected roles:
-   --mode=client and --mode=server.
+   Un único ejecutable ofrece dos roles, que deben seleccionarse
+   expresamente: --mode=client y --mode=server.
 
 
-<a name="architecture"></a>2.  ARCHITECTURE AND OPERATION
+<a name="architecture"></a>2.  ARQUITECTURA Y FUNCIONAMIENTO
 
-   In the direct TCP arrangement, the client runs libslirp and
-   connects to a separately configured QEMU stream endpoint:
-
-</pre>
-
-![Direct TCP connection between QEMU and the qnetlink client running libslirp](.github/assets/tcp-connection-light.svg#gh-light-mode-only)
-![Direct TCP connection between QEMU and the qnetlink client running libslirp](.github/assets/tcp-connection-dark.svg#gh-dark-mode-only)
-
-<pre>
-
-   In the WSS arrangement, the client reaches a server-side relay
-   through a TLS-protected WebSocket connection. The server connects
-   onward to the QEMU TCP stream peer:
+   En la conexión directa por TCP, el cliente ejecuta libslirp y se
+   conecta al extremo del flujo de QEMU, configurado por separado:
 
 </pre>
 
-![WSS TLS connection between qnetlink client, qnetlink server relay and QEMU](.github/assets/wss-relay-light.svg#gh-light-mode-only)
-![WSS TLS connection between qnetlink client, qnetlink server relay and QEMU](.github/assets/wss-relay-dark.svg#gh-dark-mode-only)
+![Conexión TCP directa entre QEMU y el cliente qnetlink que ejecuta libslirp](.github/assets/tcp-connection-light.svg#gh-light-mode-only)
+![Conexión TCP directa entre QEMU y el cliente qnetlink que ejecuta libslirp](.github/assets/tcp-connection-dark.svg#gh-dark-mode-only)
 
 <pre>
 
-   The diagrams show logical stream connections. They do not imply
-   that QEMU is started by qnetlink or that the components must
-   execute on distinct physical hosts.
-
-
-<a name="roles"></a>2.1.  Client and Server Roles
-
-   Client role
-
-      The client operates libslirp and connects to a stream peer using
-      the selected transport. Direct TCP is the default; WSS is also
-      supported. The client is the component providing the user-mode
-      networking engine.
-
-   Server role
-
-      The server accepts an incoming WSS connection and relays the
-      stream to a TCP peer, normally the separately launched QEMU
-      process. The server requires a TLS certificate and private key.
-
-
-<a name="transport"></a>2.2.  Transports and Stream Framing
-
-   The stream carries length-delimited packets. Each frame begins with
-   a four-octet, unsigned, network-byte-order packet length, followed
-   by that number of payload octets:
+   En la conexión por WSS, el cliente se conecta mediante WebSocket
+   protegido con TLS a un servidor que retransmite el flujo.
+   El servidor, a su vez, se conecta al extremo TCP de QEMU:
 
 </pre>
 
-![Stream frame with a 32-bit big-endian packet length and packet payload](.github/assets/stream-framing-light.svg#gh-light-mode-only)
-![Stream frame with a 32-bit big-endian packet length and packet payload](.github/assets/stream-framing-dark.svg#gh-dark-mode-only)
+![Conexión WSS con TLS entre el cliente qnetlink, el servidor de retransmisión qnetlink y QEMU](.github/assets/wss-relay-light.svg#gh-light-mode-only)
+![Conexión WSS con TLS entre el cliente qnetlink, el servidor de retransmisión qnetlink y QEMU](.github/assets/wss-relay-dark.svg#gh-dark-mode-only)
 
 <pre>
 
-   Zero-length packets and packets exceeding the implementation's
-   maximum packet size are rejected by the stream receiver.
-
-   WSS transports the framed stream in WebSocket binary messages.
-   Both WSS endpoints must be configured with the same WebSocket path.
-   TCP and WSS are transport choices, not different guest networking
-   engines.
+   Los diagramas representan conexiones lógicas del flujo. No implican
+   que qnetlink inicie QEMU ni que los componentes deban ejecutarse en
+   equipos físicos distintos.
 
 
-<a name="usage"></a>3.  USAGE
+<a name="roles"></a>2.1.  Roles de cliente y servidor
 
-   Direct TCP client (default transport):
+   Rol de cliente
+
+      El cliente ejecuta libslirp y se conecta al otro extremo del
+      flujo mediante el transporte elegido. Por defecto usa TCP
+      directo; también admite WSS. El cliente es el componente que
+      proporciona el motor de red en modo usuario.
+
+   Rol de servidor
+
+      El servidor acepta una conexión WSS entrante y retransmite el
+      flujo a un extremo TCP, normalmente el proceso QEMU iniciado
+      por separado. Necesita un certificado TLS y una clave privada.
+
+
+<a name="transport"></a>2.2.  Transportes y formato de las tramas
+
+   El flujo transporta paquetes delimitados por su longitud. Cada
+   trama comienza con un entero sin signo de cuatro octetos, en orden
+   de bytes de red, que indica la longitud del paquete. A continuación
+   aparecen tantos octetos de carga útil como indique ese valor:
+
+</pre>
+
+![Trama del flujo con longitud de paquete de 32 bits en big-endian y carga útil](.github/assets/stream-framing-light.svg#gh-light-mode-only)
+![Trama del flujo con longitud de paquete de 32 bits en big-endian y carga útil](.github/assets/stream-framing-dark.svg#gh-dark-mode-only)
+
+<pre>
+
+   El receptor del flujo rechaza los paquetes de longitud cero y los
+   que superan el tamaño máximo admitido por la implementación.
+
+   WSS transporta el flujo de tramas en mensajes binarios WebSocket.
+   Ambos extremos WSS deben tener configurada la misma ruta WebSocket.
+   TCP y WSS son opciones de transporte, no motores de red distintos
+   para la máquina virtual.
+
+
+<a name="usage"></a>3.  USO
+
+   Cliente TCP directo (transporte por defecto):
 
        ./qnetlink --mode=client
 
-   WSS client:
+   Cliente WSS:
 
        ./qnetlink --mode=client --transport=wss \
            --stream-host=server.example --stream-port=443 --ws-path=/qemu
 
-   WSS server:
+   Servidor WSS:
 
        ./qnetlink --mode=server --listen-host=0.0.0.0 \
            --listen-port=8443 --ws-path=/qemu \
            --cert=tls/server.crt --key=tls/server.key \
            --stream-host=127.0.0.1 --stream-port=9090
 
-   On Windows, use qnetlink.exe in place of ./qnetlink.
+   En Windows, usa qnetlink.exe en lugar de ./qnetlink.
 
-   Start the QEMU stream endpoint independently and ensure that its
-   address and port match the stream peer configured for qnetlink.
-   These commands do not start QEMU or create TLS certificates.
+   Inicia por separado el extremo del flujo de QEMU y comprueba que su
+   dirección y puerto coincidan con los del extremo remoto configurado
+   en qnetlink. Estos comandos no inician QEMU ni crean certificados
+   TLS.
 
 
-<a name="configuration"></a>4.  CONFIGURATION
+<a name="configuration"></a>4.  CONFIGURACIÓN
 
-   The repository includes qnetlink.example.ini as a reference
-   configuration. It is not loaded automatically. Copy the example,
-   edit the required values, and specify the resulting file explicitly:
+   El repositorio incluye qnetlink.example.ini como configuración de
+   referencia. No se carga automáticamente. Copia el ejemplo, modifica
+   los valores necesarios e indica expresamente el archivo resultante:
 
        ./qnetlink --config=qnetlink.ini
 
-   Command-line options may be combined with --config. Command-line
-   values take precedence over values from the configuration file.
-   The role must be selected either in the file or on the command line.
+   Puedes combinar --config con opciones de la línea de comandos.
+   Los valores de la línea de comandos tienen prioridad sobre los del
+   archivo de configuración. El rol debe seleccionarse en el archivo
+   o en la línea de comandos.
 
-   Client defaults include:
+   Entre los valores por defecto del cliente figuran:
 
-       Guest network:       10.255.254.0/24
-       DHCP start:          10.255.254.15
-       Stream peer:         127.0.0.1:9090
-       Transport:           TCP
+       Red de la VM:           10.255.254.0/24
+       Inicio del rango DHCP:  10.255.254.15
+       Extremo del flujo:      127.0.0.1:9090
+       Transporte:             TCP
 
-   Server listener defaults include:
+   La escucha del servidor tiene estos valores por defecto:
 
-       Listen address:      0.0.0.0 (IPv4)
-       Listen port:         443
+       Dirección de escucha:   0.0.0.0 (IPv4)
+       Puerto de escucha:      443
 
-   Binding a port below 1024 on Linux may require elevated privileges
-   or an appropriate system configuration.
+   En Linux, abrir un puerto de escucha inferior a 1024 puede requerir
+   privilegios elevados o una configuración del sistema que lo permita.
 
-   WSS clients verify the server certificate and hostname by default.
-   See Section 7 before changing TLS verification settings.
+   Los clientes WSS verifican por defecto el certificado del servidor
+   y su nombre de host. Consulta la sección 7 antes de modificar las
+   opciones de verificación TLS.
 
 
-<a name="building"></a>5.  BUILDING
+<a name="building"></a>5.  COMPILACIÓN
 
-   The project uses Meson. Native builds require a C11 compiler,
-   Meson, Ninja, pkg-config, GLib, libslirp 4.9.3 or later, and static
-   libwebsockets 5.0 or later. Linux native builds also require
-   OpenSSL.
+   El proyecto utiliza Meson. Para una compilación nativa hacen falta
+   un compilador C11, Meson, Ninja, pkg-config, GLib, libslirp 4.9.3 o
+   posterior y libwebsockets 5.0 o posterior como biblioteca estática.
+   Las compilaciones nativas para Linux también requieren OpenSSL.
 
-   A native build can be configured and compiled with:
+   Para configurar y realizar una compilación nativa:
 
        meson setup build
        meson compile -C build
 
-   The distribution scripts pin principal dependency versions and
-   create build environments under .build/ and deliverables under
-   dist/. The supported scripted targets are described below.
+   Los scripts de distribución fijan las versiones de las dependencias
+   principales y crean los entornos de compilación en .build/ y los
+   archivos de distribución en dist/. A continuación se describen las
+   plataformas para las que se proporcionan scripts.
 
 
 <a name="linux-build"></a>5.1.  Linux x86-64
 
-   The Linux script builds in a Debian Bullseye amd64 environment,
-   using libslirp 4.9.3 and libwebsockets 5.0.0. It strips debug
-   information and checks the executable's runtime dependencies.
+   El script para Linux compila en un entorno Debian Bullseye amd64
+   con libslirp 4.9.3 y libwebsockets 5.0.0. Elimina la información de
+   depuración y comprueba las dependencias de ejecución del ejecutable.
 
-   Host requirements include sudo, debootstrap, curl, tar, readelf,
-   sha256sum, and patch. From the project root, run:
+   El equipo de compilación necesita sudo, debootstrap, curl, tar,
+   readelf, sha256sum y patch. Desde la raíz del proyecto, ejecuta:
 
        ./scripts/build-linux-x86_64.sh
 
-   The environment and download cache are stored under
-   .build/linux-x86_64/. The portable application directory is
-   generated at dist/linux-x86_64/. Set DIST_ROOT to choose another
-   output root.
+   El entorno y la caché de descargas se guardan en
+   .build/linux-x86_64/. El directorio de la aplicación portable se
+   genera en dist/linux-x86_64/. Define DIST_ROOT para elegir otro
+   directorio raíz de salida.
 
-   The package bundles libslirp, GLib, PCRE, OpenSSL, the executable,
-   and the example INI file. Other dependencies are supplied by the
-   host operating system.
+   El paquete incluye libslirp, GLib, PCRE, OpenSSL, el ejecutable y
+   el archivo INI de ejemplo. El sistema operativo del equipo donde
+   se ejecute aporta las demás dependencias.
 
 
 <a name="windows-build"></a>5.2.  Windows x86-64
 
-   The Windows script cross-compiles from Linux with MinGW-w64 and
-   pinned MSYS2 CLANG64 runtime packages. It builds static
-   libwebsockets 5.0.0 with Windows SChannel for TLS, strips debug
-   information, and audits imported DLLs.
+   El script para Windows realiza una compilación cruzada desde Linux
+   con MinGW-w64 y versiones fijadas de los paquetes de ejecución de
+   MSYS2 CLANG64. Compila libwebsockets 5.0.0 como biblioteca estática
+   con Windows SChannel para TLS, elimina la información de depuración
+   y audita las DLL importadas.
 
-   Host requirements include Meson, Ninja, pkg-config, curl, bsdtar,
-   CMake, patch, and the x86_64-w64-mingw32 GCC/binutils tools. Run:
+   El equipo de compilación necesita Meson, Ninja, pkg-config, curl,
+   bsdtar, CMake, patch y las herramientas GCC/binutils de
+   x86_64-w64-mingw32. Ejecuta:
 
        ./scripts/build-win64.sh
 
-   The sysroot, dependency cache, and intermediate build are stored
-   under .build/windows-x86_64/. The portable application directory
-   is generated at dist/windows-x86_64/. Set DIST_ROOT to choose
-   another output root.
+   La raíz del sistema de destino (sysroot), la caché de dependencias
+   y los archivos intermedios de compilación se guardan en
+   .build/windows-x86_64/. El directorio de la aplicación portable se
+   genera en dist/windows-x86_64/. Define DIST_ROOT para elegir otro
+   directorio raíz de salida.
 
 
-<a name="distribution"></a>6.  DISTRIBUTION CONTENTS
+<a name="distribution"></a>6.  CONTENIDO DE LA DISTRIBUCIÓN
 
-   Each build script replaces its platform output directory with the
-   current build. The scripts do not create ZIP or TAR archives; the
-   resulting directory can be packaged separately.
+   Cada script de compilación sustituye el directorio de salida de su
+   plataforma por el resultado de la compilación actual. Los scripts
+   no crean archivos ZIP ni TAR; el directorio resultante puede
+   empaquetarse por separado.
 
-   Linux output includes qnetlink, qnetlink.example.ini, and
-   a lib/ directory containing bundled runtime libraries.
+   La distribución para Linux incluye qnetlink, qnetlink.example.ini
+   y un directorio lib/ con las bibliotecas de ejecución necesarias
+   que se distribuyen con la aplicación.
 
-   Windows output includes qnetlink.exe,
-   qnetlink.example.ini, and required third-party runtime DLLs.
-   Windows system DLLs are provided by Windows and are not bundled.
-
-
-<a name="security"></a>7.  SECURITY CONSIDERATIONS
-
-   WSS uses TLS to protect the transport. The server requires a
-   certificate and private key, and WSS clients verify the server
-   certificate and hostname by default.
-
-   The --tls-insecure option disables certificate and hostname
-   verification. It is intended only for local testing with
-   self-signed certificates; disabling verification removes an
-   important protection against connecting to an unintended peer.
-
-   The WSS server may be configured to listen on all IPv4 interfaces
-   (0.0.0.0). Operators should consider the network exposure of the
-   listener, protect private keys, and restrict access as appropriate
-   for their deployment. The QEMU TCP peer must likewise be configured
-   with attention to its listening address and network reachability.
-
-   These considerations describe operational implications of the
-   documented options; they do not constitute a security audit.
+   La distribución para Windows incluye qnetlink.exe,
+   qnetlink.example.ini y las DLL de ejecución de terceros necesarias.
+   Las DLL del sistema las proporciona Windows y no se incluyen.
 
 
-<a name="limitations"></a>8.  LIMITATIONS
+<a name="security"></a>7.  CONSIDERACIONES DE SEGURIDAD
 
-   The supplied distribution scripts target Linux x86-64 and Windows
-   x86-64. The server currently accepts WSS connections; direct TCP
-   is available as a client transport. The server handles one active
-   WSS client at a time.
+   WSS utiliza TLS para proteger el transporte. El servidor necesita
+   un certificado y una clave privada, y los clientes WSS verifican
+   por defecto el certificado del servidor y su nombre de host.
 
-   QEMU startup, guest configuration, and TLS certificate creation
-   are outside the scope of the build scripts. No particular QEMU
-   invocation is prescribed by this memo.
+   La opción --tls-insecure desactiva la verificación del certificado
+   y del nombre de host. Está pensada únicamente para pruebas locales
+   con certificados autofirmados; desactivar la verificación elimina
+   una protección importante frente a conexiones con un extremo
+   distinto del previsto.
+
+   El servidor WSS puede configurarse para escuchar en todas las
+   interfaces IPv4 (0.0.0.0). Quienes lo administren deben valorar la
+   exposición del puerto de escucha en la red, proteger las claves
+   privadas y restringir el acceso según las necesidades del despliegue.
+   También debe prestarse atención a la dirección de escucha del
+   extremo TCP de QEMU y a su accesibilidad desde la red.
+
+   Estas consideraciones describen las implicaciones operativas de
+   las opciones documentadas; no constituyen una auditoría de seguridad.
+
+
+<a name="limitations"></a>8.  LIMITACIONES
+
+   Los scripts de distribución incluidos están destinados a Linux
+   x86-64 y Windows x86-64. Actualmente, el servidor acepta conexiones
+   WSS; el TCP directo está disponible como transporte del cliente.
+   El servidor atiende a un único cliente WSS activo a la vez.
+
+   El inicio de QEMU, la configuración de la máquina virtual y la
+   creación de certificados TLS quedan fuera del alcance de los scripts
+   de compilación. Este memorando no prescribe ningún comando concreto
+   para ejecutar QEMU.
 </pre>
